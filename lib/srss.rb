@@ -19,7 +19,7 @@ module SRSS
         :id           => id,
         :name         => name,
         :callback     => blk,
-        :disconnected => false
+        :blocked => false
       })
 
       id
@@ -32,6 +32,24 @@ module SRSS
     end
 
     def disconnect_all()
+      @_signal_connections = []
+      @_next_connection_id = 1
+    end
+
+    def block(id)
+      handler = @_signal_connections.detect { |handler| handler[:id] == id }
+
+      unless handler.nil?
+        handler[:blocked] = true
+      end
+    end
+
+    def unblock(id)
+      handler = @_signal_connections.detect { |handler| handler[:id] == id }
+
+      unless handler.nil?
+        handler[:blocked] = false
+      end
     end
 
     def emit(name, *args)
@@ -43,7 +61,7 @@ module SRSS
       args_handler.concat(args) if args.any?
 
       handlers.each do |handler;ret|
-        unless handler[:disconnected]
+        unless handler[:blocked]
           begin
           ret = handler[:callback].call(*args_handler)
           break if ret == true
