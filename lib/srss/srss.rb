@@ -52,6 +52,14 @@ module SRSS
       end
     end
 
+    def connected?(id)
+      @_signal_connections.any? { |handler| handler[:id] == id }
+    end
+
+    def blocked?(id)
+      @_signal_connections.any? { |handle| handler[:id] == id and handler[:blocked] == true }
+    end
+
     def emit(name, *args)
       return unless @_signal_connections
 
